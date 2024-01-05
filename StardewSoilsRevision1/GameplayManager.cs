@@ -58,7 +58,7 @@ namespace StardewSoils
         void GrowthPause()
         {
                 Game1.getFarm().terrainFeatures.TryGetValue(TilePos, out TerrainFeature Crop);
-                if ((Crop as HoeDirt).crop == null)
+                if (CropNullCheck(TilePos) == false)
                 {
                     return;
                 }
@@ -87,7 +87,7 @@ namespace StardewSoils
         void CropFinish()
         {
             Game1.getFarm().terrainFeatures.TryGetValue(TilePos, out TerrainFeature Crop);
-            if ((Crop as HoeDirt).crop == null)
+            if (CropNullCheck(TilePos) == false)
             {
                 return;
             }
@@ -108,8 +108,7 @@ namespace StardewSoils
         public void GetCropOnTile(Vector2 TilePos)
         {
             Game1.getFarm().terrainFeatures.TryGetValue(TilePos, out TerrainFeature Crop);
-
-            if ((Crop as HoeDirt) == null || (Crop as HoeDirt).crop == null)
+            if (CropNullCheck(TilePos) == false)
             {
                 return;
             }
@@ -132,6 +131,16 @@ namespace StardewSoils
                 return false;
             }
             return false;
+        }
+
+        public bool CropNullCheck(Vector2 TilePos)
+        {
+            Game1.getFarm().terrainFeatures.TryGetValue(TilePos, out TerrainFeature Crop);
+            if (Crop == null || (Crop as HoeDirt) == null || (Crop as HoeDirt).crop == null)
+            {
+                return false;
+            }
+            return true;
         }
     }
 
@@ -162,6 +171,7 @@ namespace StardewSoils
             helper.Events.Display.MenuChanged += this.AddItemsToShop;
             helper.Events.GameLoop.DayEnding += (Obj, eventarg) => this.OnDayEnd(Obj, eventarg, helper);
             helper.Events.GameLoop.SaveLoaded += (Obj, eventarg) => this.SaveLoader(Obj, eventarg, helper);
+            helper.Events.Content.AssetRequested += (Obj, eventarg) => SoilQualityTextHandler.SeedDescriptionFixer(Obj, eventarg, helper , Monitor);
         }
 
         private void AddItemsToShop(object sender, MenuChangedEventArgs e)
@@ -191,7 +201,7 @@ namespace StardewSoils
                 {
                     Vector2 Pos = Game1.GlobalToLocal(new Vector2(Tile.Key.X * Game1.tileSize, Tile.Key.Y * Game1.tileSize));
                     e.SpriteBatch.Draw(OutLine, Pos, Color.White);
-                    string TileMessage = "N: " + Tile.Value.Nitrogen + " \nPH: " + Tile.Value.Phosphorus + " \nK: " + Tile.Value.Potassium;
+                    string TileMessage = "N: " + Tile.Value.Nitrogen + " \nP: " + Tile.Value.Phosphorus + " \nK: " + Tile.Value.Potassium;
                     e.SpriteBatch.DrawString(Game1.dialogueFont, TileMessage, Pos, Color.Black, 0.0f, new Vector2(0,0), 0.5f, SpriteEffects.None, 0);;
                 }
             }
