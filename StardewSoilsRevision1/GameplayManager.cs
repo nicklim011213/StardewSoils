@@ -57,8 +57,7 @@ namespace StardewSoils
 
         void GrowthPause()
         {
-                Game1.getFarm().terrainFeatures.TryGetValue(TilePos, out TerrainFeature Crop);
-                if (CropNullCheck(TilePos) == false)
+                if (CropNullCheck(TilePos, out TerrainFeature Crop) == false)
                 {
                     return;
                 }
@@ -86,8 +85,7 @@ namespace StardewSoils
 
         void CropFinish()
         {
-            Game1.getFarm().terrainFeatures.TryGetValue(TilePos, out TerrainFeature Crop);
-            if (CropNullCheck(TilePos) == false)
+            if (CropNullCheck(TilePos, out TerrainFeature Crop) == false)
             {
                 return;
             }
@@ -107,8 +105,7 @@ namespace StardewSoils
 
         public void GetCropOnTile(Vector2 TilePos)
         {
-            Game1.getFarm().terrainFeatures.TryGetValue(TilePos, out TerrainFeature Crop);
-            if (CropNullCheck(TilePos) == false)
+            if (CropNullCheck(TilePos, out TerrainFeature Crop) == false)
             {
                 return;
             }
@@ -133,13 +130,15 @@ namespace StardewSoils
             return false;
         }
 
-        public bool CropNullCheck(Vector2 TilePos)
+        public bool CropNullCheck(Vector2 TilePos, out TerrainFeature CurrentCrop)
         {
             Game1.getFarm().terrainFeatures.TryGetValue(TilePos, out TerrainFeature Crop);
             if (Crop == null || (Crop as HoeDirt) == null || (Crop as HoeDirt).crop == null)
             {
+                CurrentCrop = null;
                 return false;
             }
+            CurrentCrop = Crop;
             return true;
         }
     }
