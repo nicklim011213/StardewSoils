@@ -19,9 +19,9 @@ namespace StardewSoils
 
     class LinkedTileSoilStats
     {
-        public int Nitrogen = 0;
-        public int Phosphorus = 0;
-        public int Potassium = 0;
+        public int Nitrogen = RandomGen.SoilRNG.Next(1,10);
+        public int Phosphorus = RandomGen.SoilRNG.Next(1, 10);
+        public int Potassium = RandomGen.SoilRNG.Next(1, 10);
         public Vector2 TilePos = new Vector2(-1,-1);
         public int CropType = -1; // No Crop is -1
         public bool aftergrowth = false;
@@ -146,6 +146,11 @@ namespace StardewSoils
     static class TileList
     {
         public static Dictionary<Vector2,LinkedTileSoilStats> AllRegisteredTiles = new Dictionary<Vector2, LinkedTileSoilStats>();
+    }
+
+    static class RandomGen
+    {
+        public static Random SoilRNG = new Random((int)DateTime.Now.Ticks);
     }
 
     internal sealed class ModEntry : Mod

@@ -50,12 +50,59 @@ namespace StardewSoils
 
                 //Special
                 {454, new Vector3(-1, -1, -1)}, // Ancient Fruit
-                {90, new Vector3 (0, 0, 0)}, // Cactus Fruit
+                //{90, new Vector3 (0, 0, 0)}, // Cactus Fruit (Can only be grown indoors UH OH SPAGETI-O)
                 {771, new Vector3 (0, 0, 0)}, // Fiber (0 Because it may not be balanced if the weeds are taken into account)
                 {832, new Vector3(0, 1, 1)}, // Pineapple
                 {830, new Vector3(-1, 0, -1)}, // Taro Root
                 {417, new Vector3(0, 2, 2)}, // Sweet Gem Berry
                 {815, new Vector3(0, -1, -1)} //Tea Bush
             };
-        }
+
+            public static Dictionary<int, int> SeedToCrop = new Dictionary<int, int>
+            {
+                {597, 429}, // Jazz Seeds
+                {190, 474}, // Cauliflower seeds
+                {433, 433}, // Coffee Beans
+                {248, 476}, // Garlic Seeds
+                {188, 473}, // Bean Starter
+                {250, 477}, // Kale Seeds
+                {24,  472}, // Parsnip Seeds
+                {192, 475}, // Potato Seeds
+                {252, 478}, // Ruhbarb Seeds
+                {400, 745}, // Strawbery Seeds
+                {591, 427}, // Tulip Bulb
+                {271, 273}, // Rice Shoot
+
+                {258, 481}, // Blueberry Seeds
+                {270, 487}, // Corn Seeds
+                {304, 302}, // Hops Starter
+                {260, 482}, // Pepper Seeds
+                {254, 479}, // Melon Seeds
+                {376, 453}, // Poppy Seeds
+                {264, 484}, // Raddish Seeds
+                {266, 485}, // Red Cabbage Seeds
+                {286, 486}, // Starfruit Seeds
+                {593, 455}, // Spangle Seeds
+                {431, 421}, // Sunflower Seeds
+                {256, 480}, // Tomato Seeds
+                {262, 483}, // Wheat Seeds
+
+                {300, 299}, // Amarath Seeds
+                {274, 489}, // Artichoke Seeds
+                {284, 494}, // Beet Seeds
+                {278, 491}, // Bok Choy Seeds
+                {282, 493}, // Cranberry Seeds
+                {272, 488}, // Eggplant Seeds
+                {595, 425}, // Fairy Seeds
+                {398, 301}, // Grape Starter
+                {276, 490}, // Pumpkin Seeds
+                {280, 492}, // Yam Seeds
+                {454, 499}, // Ancient Seeds
+                {771, 885}, // Fiber Seeds
+                {832, 833}, // Pineapple Seeds
+                {830, 831}, // Tarop Root Seeds
+                {417, 347}, // Rare Seed (Sweet Gem Berry Seed)
+                {815, 251}  // Tea Sapling
+            };
+    }
     }
