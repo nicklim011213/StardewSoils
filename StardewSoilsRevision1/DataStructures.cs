@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using StardewValley;
 
 namespace StardewSoils
 {
@@ -105,4 +106,21 @@ namespace StardewSoils
                 {815, 251}  // Tea Sapling
             };
     }
+
+    public static class PlantableLocations
+    {
+        public static List<GameLocation> Areas = new List<GameLocation>();
+
+        /*
+        public static void InitlizeLocations()
+        {
+            foreach (var Location in Game1.locations)
+            {
+                if (Location.IsFarm == true || Location.IsGreenhouse == true)
+                {
+                    Areas.Add(Location);
+                }
+            }
+        }*/
     }
+}

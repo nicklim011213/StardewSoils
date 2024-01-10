@@ -65,9 +65,9 @@ namespace StardewSoils
         {
             string Arrow = " ";
             if (Req > 0)
-                Arrow = "^";
+                Arrow = "+";
             else if (Req < 0)
-                Arrow = "V";
+                Arrow = "-";
             else
                 Arrow = " ";
 

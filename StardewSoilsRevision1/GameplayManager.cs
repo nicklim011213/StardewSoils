@@ -9,6 +9,9 @@ using System.IO;
 using StardewValley.Menus;
 using System.Collections.Generic;
 using System.Linq;
+using xTile.Tiles;
+using xTile.Layers;
+using xTile.Dimensions;
 
 namespace StardewSoils
 {
@@ -25,6 +28,7 @@ namespace StardewSoils
         public Vector2 TilePos = new Vector2(-1,-1);
         public int CropType = -1; // No Crop is -1
         public bool aftergrowth = false;
+        //public GameLocation Location;
         //public Crop crop;
 
         public LinkedTileSoilStats(Vector2 Tile)
@@ -199,7 +203,7 @@ namespace StardewSoils
 
         private void RenderOverlay(object sender, RenderedEventArgs e, IModHelper helper, Texture2D OutLine)
         {
-            if (Game1.player.CurrentItem != null && Game1.player.CurrentItem.DisplayName == "SoilReader" && !Game1.player.hasMenuOpen.Value)
+            if (Game1.player.CurrentItem != null && Game1.player.CurrentItem.DisplayName == "SoilReader" && !Game1.player.hasMenuOpen.Value && (Game1.player.currentLocation.IsFarm || Game1.player.currentLocation.IsGreenhouse))
             {
                 foreach (var Tile in TileList.AllRegisteredTiles)
                 {
@@ -229,7 +233,10 @@ namespace StardewSoils
         {
             foreach (var TileTilled in e.Added)
             {
-                if (TileTilled.Value is HoeDirt)
+                GameLocation TileLocation = TileTilled.Value.currentLocation;   
+                var Check = TileLocation.doesTileHaveProperty((int)TileTilled.Key.X, (int)TileTilled.Key.Y, "Diggable", "Back");
+
+                if (TileTilled.Value is HoeDirt && !TileList.AllRegisteredTiles.ContainsKey(TileTilled.Key) && Check == "T")
                 {
                     var NewTile = new LinkedTileSoilStats(TileTilled.Key);
                 }
