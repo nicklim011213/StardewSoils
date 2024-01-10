@@ -27,7 +27,7 @@ namespace StardewSoils
 
         public static void LoadData(IModHelper helper)
         {
-            var model = helper.Data.ReadJsonFile<Dictionary<Vector2, LinkedTileSoilStats>>("SoilData_" + Constants.SaveFolderName.ToString() + ".json"); //If anyone get figure out a way to use typeof(TileList.AllRegisteredTiles) in the type please do
+            var model = helper.Data.ReadJsonFile<Dictionary<TilePosAndLoc, LinkedTileSoilStats>>("SoilData_" + Constants.SaveFolderName.ToString() + ".json"); //If anyone get figure out a way to use typeof(TileList.AllRegisteredTiles) in the type please do
             if (model == null)
             {
                 helper.Data.WriteJsonFile("SoilData_" + Constants.SaveFolderName.ToString() + ".json", TileList.AllRegisteredTiles);

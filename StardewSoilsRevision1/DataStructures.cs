@@ -107,11 +107,12 @@ namespace StardewSoils
             };
     }
 
+    /*
     public static class PlantableLocations
     {
         public static List<GameLocation> Areas = new List<GameLocation>();
 
-        /*
+        
         public static void InitlizeLocations()
         {
             foreach (var Location in Game1.locations)
@@ -121,6 +122,20 @@ namespace StardewSoils
                     Areas.Add(Location);
                 }
             }
-        }*/
+        }
+    }
+    */
+
+    public struct TilePosAndLoc
+    {
+        public Vector2 pos;
+        public GameLocation location;
+
+        public TilePosAndLoc(Vector2 pos, GameLocation location)
+        {
+            this.pos = pos;
+            this.location = location;
+        }
+
     }
 }

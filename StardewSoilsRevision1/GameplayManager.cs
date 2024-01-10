@@ -12,6 +12,7 @@ using System.Linq;
 using xTile.Tiles;
 using xTile.Layers;
 using xTile.Dimensions;
+using StardewValley.Locations;
 
 namespace StardewSoils
 {
@@ -28,17 +29,18 @@ namespace StardewSoils
         public Vector2 TilePos = new Vector2(-1,-1);
         public int CropType = -1; // No Crop is -1
         public bool aftergrowth = false;
-        //public GameLocation Location;
+        public GameLocation Location;
         //public Crop crop;
 
-        public LinkedTileSoilStats(Vector2 Tile)
+        public LinkedTileSoilStats(Vector2 Tile, GameLocation location)
         {
             TilePos = Tile;
-            if (!TileList.AllRegisteredTiles.ContainsKey(TilePos))
+            this.Location = location;
+            if (!TileList.AllRegisteredTiles.ContainsKey(new TilePosAndLoc(TilePos, Location)))
             {
-                TileList.AllRegisteredTiles.Add(TilePos, this);
+                TileList.AllRegisteredTiles.Add(new TilePosAndLoc(TilePos, Location), this);
             }
-            GetCropOnTile(Tile);
+            GetCropOnTile(Tile, Location);
         }
 
         public LinkedTileSoilStats()
@@ -48,7 +50,7 @@ namespace StardewSoils
 
         public void GrowthCheck()
         {
-            GetCropOnTile(TilePos);
+            GetCropOnTile(TilePos, Location);
             if (CropGrowthRefrences.CropLookup.TryGetValue(CropType, out var reqs) == true)
             {
                 if (Nitrogen < reqs.X || Phosphorus < reqs.X || Potassium < reqs.X)
@@ -61,7 +63,7 @@ namespace StardewSoils
 
         void GrowthPause()
         {
-                if (CropNullCheck(TilePos, out TerrainFeature Crop) == false)
+                if (CropNullCheck(TilePos, out TerrainFeature Crop, Location) == false)
                 {
                     return;
                 }
@@ -89,7 +91,7 @@ namespace StardewSoils
 
         void CropFinish()
         {
-            if (CropNullCheck(TilePos, out TerrainFeature Crop) == false)
+            if (CropNullCheck(TilePos, out TerrainFeature Crop, Location) == false)
             {
                 return;
             }
@@ -107,9 +109,9 @@ namespace StardewSoils
             }
         }
 
-        public void GetCropOnTile(Vector2 TilePos)
+        public void GetCropOnTile(Vector2 TilePos, GameLocation location)
         {
-            if (CropNullCheck(TilePos, out TerrainFeature Crop) == false)
+            if (CropNullCheck(TilePos, out TerrainFeature Crop, Location) == false)
             {
                 return;
             }
@@ -134,9 +136,9 @@ namespace StardewSoils
             return false;
         }
 
-        public bool CropNullCheck(Vector2 TilePos, out TerrainFeature CurrentCrop)
+        public bool CropNullCheck(Vector2 TilePos, out TerrainFeature CurrentCrop, GameLocation location)
         {
-            Game1.getFarm().terrainFeatures.TryGetValue(TilePos, out TerrainFeature Crop);
+            location.terrainFeatures.TryGetValue(TilePos, out TerrainFeature Crop);
             if (Crop == null || (Crop as HoeDirt) == null || (Crop as HoeDirt).crop == null)
             {
                 CurrentCrop = null;
@@ -149,7 +151,7 @@ namespace StardewSoils
 
     static class TileList
     {
-        public static Dictionary<Vector2,LinkedTileSoilStats> AllRegisteredTiles = new Dictionary<Vector2, LinkedTileSoilStats>();
+        public static Dictionary<TilePosAndLoc,LinkedTileSoilStats> AllRegisteredTiles = new Dictionary<TilePosAndLoc, LinkedTileSoilStats>();
     }
 
     static class RandomGen
@@ -207,7 +209,7 @@ namespace StardewSoils
             {
                 foreach (var Tile in TileList.AllRegisteredTiles)
                 {
-                    Vector2 Pos = Game1.GlobalToLocal(new Vector2(Tile.Key.X * Game1.tileSize, Tile.Key.Y * Game1.tileSize));
+                    Vector2 Pos = Game1.GlobalToLocal(new Vector2(Tile.Key.pos.X * Game1.tileSize, Tile.Key.pos.Y * Game1.tileSize));
                     e.SpriteBatch.Draw(OutLine, Pos, Color.White);
                     string TileMessage = "N: " + Tile.Value.Nitrogen + " \nP: " + Tile.Value.Phosphorus + " \nK: " + Tile.Value.Potassium;
                     e.SpriteBatch.DrawString(Game1.dialogueFont, TileMessage, Pos, Color.Black, 0.0f, new Vector2(0,0), 0.5f, SpriteEffects.None, 0);;
@@ -236,9 +238,9 @@ namespace StardewSoils
                 GameLocation TileLocation = TileTilled.Value.currentLocation;   
                 var Check = TileLocation.doesTileHaveProperty((int)TileTilled.Key.X, (int)TileTilled.Key.Y, "Diggable", "Back");
 
-                if (TileTilled.Value is HoeDirt && !TileList.AllRegisteredTiles.ContainsKey(TileTilled.Key) && Check == "T")
+                if (TileTilled.Value is HoeDirt && !TileList.AllRegisteredTiles.ContainsKey(new TilePosAndLoc(TileTilled.Key, e.Location)) && Check == "T")
                 {
-                    var NewTile = new LinkedTileSoilStats(TileTilled.Key);
+                    var NewTile = new LinkedTileSoilStats(TileTilled.Key, TileLocation);
                 }
             }
             
@@ -248,7 +250,7 @@ namespace StardewSoils
         {
             foreach (var Tile in TileList.AllRegisteredTiles)
             {
-                Tile.Value.GetCropOnTile(Tile.Key); // Finds if crop is on tile if crop is -1 no crop is not on tile
+                Tile.Value.GetCropOnTile(Tile.Key.pos, Tile.Key.location); // Finds if crop is on tile if crop is -1 no crop is not on tile
                 if (Tile.Value.CropType != -1)
                 {
                     Tile.Value.GrowthCheck();
