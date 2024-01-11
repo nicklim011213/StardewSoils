@@ -21,7 +21,71 @@ namespace StardewSoils
         void RegisterSerializerType(Type type);
     }
 
-    class LinkedTileSoilStats
+    public static class SoilDataBuilder
+    {
+        public static string NewValueString()
+        {
+            int Nitrogen = RandomGen.SoilRNG.Next(1, 10);
+            int Phosphorus = RandomGen.SoilRNG.Next(1, 10);
+            int Potassium = RandomGen.SoilRNG.Next(1, 10);
+            int CropType = -1;
+            bool afterGrowth = false;
+            string afterGrowthString = "F";
+            if (afterGrowth)
+                afterGrowthString = "T";
+            else
+                afterGrowthString = "F";
+                
+
+            return "N:" + Nitrogen + " P:" + Phosphorus + " K:" + Potassium + " CT:" + CropType + " AG:" + afterGrowthString;
+        }
+
+        public static string ClassToValueString(LinkedTileSoilStats Tile)
+        {
+            string afterGrowthString = "F";
+            if (Tile.aftergrowth)
+                afterGrowthString = "T";
+            else
+                afterGrowthString = "F";
+            return "N:" + Tile.Nitrogen + "P:" + Tile.Phosphorus + "K:" + Tile.Potassium + "CT:" + Tile.CropType + "AG:" + afterGrowthString;
+        }
+
+        public static LinkedTileSoilStats StringToClass(string EncodedClass, string EncodedKey, GameLocation location)
+        {
+            int NitrogenIndex = EncodedClass.IndexOf("N:") + 2;
+            int PhosphorusIndex = EncodedClass.IndexOf("P:") + 2;
+            int PotassiumIndex = EncodedClass.IndexOf("K:") + 2;
+            int CropTypeIndex = EncodedClass.IndexOf("CT:") + 3;
+            int AfterGrowthIndex = EncodedClass.IndexOf("AG:") + 3;
+
+            Int32.TryParse(EncodedClass.Substring(NitrogenIndex, PhosphorusIndex - 2 - NitrogenIndex), out int Nitrogen);
+            Int32.TryParse(EncodedClass.Substring(PhosphorusIndex, PotassiumIndex - 2 - PhosphorusIndex), out int Phosphorus);
+            Int32.TryParse(EncodedClass.Substring(PotassiumIndex, CropTypeIndex - 2 - PotassiumIndex), out int Potassium);
+            Int32.TryParse(EncodedClass.Substring(CropTypeIndex, AfterGrowthIndex - 3 - CropTypeIndex), out int CropType);
+            string Val = EncodedClass.Substring(AfterGrowthIndex);
+            bool afterGrowth = false;
+            if (Val.Contains("T"))
+                afterGrowth = true;
+            else
+                afterGrowth = false;
+
+            int XStart = EncodedKey.IndexOf("SaltWaterHippo.StardewSoil_") + "SaltWaterHippo.StardewSoil_".Length;
+            int XEnd = EncodedKey.IndexOf("-");
+            Int32.TryParse(EncodedKey.Substring(XStart, XEnd - XStart), out int KeyX);
+            Int32.TryParse(EncodedKey.Substring(XEnd + 1), out int KeyY);
+            Vector2 Pos = new Vector2(KeyX, KeyY);
+
+
+            return new LinkedTileSoilStats(Nitrogen, Phosphorus, Potassium, CropType, afterGrowth, Pos, location, EncodedKey);
+        }
+
+        public static string PositionToKeyClass(Vector2 pos)
+        {
+            return "SaltWaterHippo.StardewSoil_" + pos.X.ToString() + "-" + pos.Y.ToString();
+        }
+    }
+
+    public class LinkedTileSoilStats
     {
         public int Nitrogen = RandomGen.SoilRNG.Next(1,10);
         public int Phosphorus = RandomGen.SoilRNG.Next(1, 10);
@@ -29,28 +93,23 @@ namespace StardewSoils
         public Vector2 TilePos = new Vector2(-1,-1);
         public int CropType = -1; // No Crop is -1
         public bool aftergrowth = false;
-        public GameLocation Location;
-        //public Crop crop;
+        public GameLocation Location = null;
 
-        public LinkedTileSoilStats(Vector2 Tile, GameLocation location)
+        public LinkedTileSoilStats(int N, int P, int K, int C, bool A, Vector2 pos, GameLocation loc, string Key)
         {
-            TilePos = Tile;
-            this.Location = location;
-            if (!TileList.AllRegisteredTiles.ContainsKey(new TilePosAndLoc(TilePos, Location)))
-            {
-                TileList.AllRegisteredTiles.Add(new TilePosAndLoc(TilePos, Location), this);
-            }
-            GetCropOnTile(Tile, Location);
-        }
-
-        public LinkedTileSoilStats()
-        {
-            //crop = null;
+            Nitrogen = N;
+            Phosphorus = P;
+            Potassium = K;
+            CropType = C;
+            aftergrowth = A;
+            this.TilePos = pos;
+            Location = loc;
+            GetCropOnTile(this.TilePos, loc);
+            TileList.AllRegisteredTiles[new TilePosAndLoc(this.TilePos, this.Location.ToString())] = this;
         }
 
         public void GrowthCheck()
         {
-            GetCropOnTile(TilePos, Location);
             if (CropGrowthRefrences.CropLookup.TryGetValue(CropType, out var reqs) == true)
             {
                 if (Nitrogen < reqs.X || Phosphorus < reqs.X || Potassium < reqs.X)
@@ -179,7 +238,6 @@ namespace StardewSoils
             helper.Events.GameLoop.DayStarted += (Obj, eventarg) => this.OnDayStart(Obj, eventarg, helper);
             helper.Events.GameLoop.GameLaunched += (Obj, eventarg) => this.OnGameStart(Obj, eventarg, helper);
             helper.Events.Display.MenuChanged += this.AddItemsToShop;
-            helper.Events.GameLoop.DayEnding += (Obj, eventarg) => this.OnDayEnd(Obj, eventarg, helper);
             helper.Events.GameLoop.SaveLoaded += (Obj, eventarg) => this.SaveLoader(Obj, eventarg, helper);
             helper.Events.Content.AssetRequested += (Obj, eventarg) => SoilQualityTextHandler.SeedDescriptionFixer(Obj, eventarg, helper , Monitor);
         }
@@ -206,14 +264,18 @@ namespace StardewSoils
         private void RenderOverlay(object sender, RenderedEventArgs e, IModHelper helper, Texture2D OutLine)
         {
             if (Game1.player.CurrentItem != null && Game1.player.CurrentItem.DisplayName == "SoilReader" && !Game1.player.hasMenuOpen.Value && (Game1.player.currentLocation.IsFarm || Game1.player.currentLocation.IsGreenhouse))
-            {
+            {   
                 foreach (var Tile in TileList.AllRegisteredTiles)
                 {
-                    Vector2 Pos = Game1.GlobalToLocal(new Vector2(Tile.Key.pos.X * Game1.tileSize, Tile.Key.pos.Y * Game1.tileSize));
-                    e.SpriteBatch.Draw(OutLine, Pos, Color.White);
-                    string TileMessage = "N: " + Tile.Value.Nitrogen + " \nP: " + Tile.Value.Phosphorus + " \nK: " + Tile.Value.Potassium;
-                    e.SpriteBatch.DrawString(Game1.dialogueFont, TileMessage, Pos, Color.Black, 0.0f, new Vector2(0,0), 0.5f, SpriteEffects.None, 0);;
+                    if (Tile.Value.Location == Game1.player.currentLocation)
+                    {
+                        Vector2 Pos = Game1.GlobalToLocal(new Vector2(Tile.Value.TilePos.X * Game1.tileSize, Tile.Value.TilePos.Y * Game1.tileSize));
+                        e.SpriteBatch.Draw(OutLine, Pos, Color.White);
+                        string TileMessage = "N: " + Tile.Value.Nitrogen + " \nP: " + Tile.Value.Phosphorus + " \nK: " + Tile.Value.Potassium;
+                        e.SpriteBatch.DrawString(Game1.dialogueFont, TileMessage, Pos, Color.Black, 0.0f, new Vector2(0, 0), 0.5f, SpriteEffects.None, 0); ;
+                    }
                 }
+                
             }
         }
 
@@ -235,12 +297,16 @@ namespace StardewSoils
         {
             foreach (var TileTilled in e.Added)
             {
+
                 GameLocation TileLocation = TileTilled.Value.currentLocation;   
                 var Check = TileLocation.doesTileHaveProperty((int)TileTilled.Key.X, (int)TileTilled.Key.Y, "Diggable", "Back");
 
-                if (TileTilled.Value is HoeDirt && !TileList.AllRegisteredTiles.ContainsKey(new TilePosAndLoc(TileTilled.Key, e.Location)) && Check == "T")
+                if (TileTilled.Value is HoeDirt && Check == "T")
                 {
-                    var NewTile = new LinkedTileSoilStats(TileTilled.Key, TileLocation);
+                    string TileData = SoilDataBuilder.NewValueString();
+                    string TileKey = SoilDataBuilder.PositionToKeyClass(TileTilled.Key);
+                    Game1.player.currentLocation.modData[TileKey] = TileData;
+                    SoilDataBuilder.StringToClass(TileData, TileKey, TileLocation);
                 }
             }
             
@@ -250,22 +316,21 @@ namespace StardewSoils
         {
             foreach (var Tile in TileList.AllRegisteredTiles)
             {
-                Tile.Value.GetCropOnTile(Tile.Key.pos, Tile.Key.location); // Finds if crop is on tile if crop is -1 no crop is not on tile
-                if (Tile.Value.CropType != -1)
-                {
-                    Tile.Value.GrowthCheck();
-                }
+                Tile.Value.GrowthCheck();
+                Tile.Value.Location.modData[SoilDataBuilder.PositionToKeyClass(Tile.Value.TilePos)] = SoilDataBuilder.ClassToValueString(Tile.Value);
             }
-        }
-
-        private void OnDayEnd(object sender, DayEndingEventArgs e, IModHelper helper)
-        {
-            SaveHandler.WriteDataToFile(helper);
         }
 
         private void SaveLoader(object sender, SaveLoadedEventArgs e, IModHelper helper)
         {
-            SaveHandler.LoadData(helper);
+            foreach (GameLocation loc in PlantableLocations.Areas)
+            {
+                foreach (var Tile in loc.modData.Keys) 
+                {
+                    var Value = loc.modData[Tile];
+                    SoilDataBuilder.StringToClass(Value, Tile, loc);
+                }
+            }
         }
     }
 }

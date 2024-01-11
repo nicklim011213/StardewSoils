@@ -107,7 +107,7 @@ namespace StardewSoils
             };
     }
 
-    /*
+    
     public static class PlantableLocations
     {
         public static List<GameLocation> Areas = new List<GameLocation>();
@@ -124,14 +124,14 @@ namespace StardewSoils
             }
         }
     }
-    */
+    
 
     public struct TilePosAndLoc
     {
         public Vector2 pos;
-        public GameLocation location;
+        public string location;
 
-        public TilePosAndLoc(Vector2 pos, GameLocation location)
+        public TilePosAndLoc(Vector2 pos, string location)
         {
             this.pos = pos;
             this.location = location;
