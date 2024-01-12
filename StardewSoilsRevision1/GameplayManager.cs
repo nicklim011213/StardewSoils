@@ -323,6 +323,7 @@ namespace StardewSoils
 
         private void SaveLoader(object sender, SaveLoadedEventArgs e, IModHelper helper)
         {
+            PlantableLocations.InitlizeLocations();
             foreach (GameLocation loc in PlantableLocations.Areas)
             {
                 foreach (var Tile in loc.modData.Keys) 
