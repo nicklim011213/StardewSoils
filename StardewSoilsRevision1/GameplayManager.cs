@@ -60,7 +60,7 @@ namespace StardewSoils
 
             Int32.TryParse(EncodedClass.Substring(NitrogenIndex, PhosphorusIndex - 2 - NitrogenIndex), out int Nitrogen);
             Int32.TryParse(EncodedClass.Substring(PhosphorusIndex, PotassiumIndex - 2 - PhosphorusIndex), out int Phosphorus);
-            Int32.TryParse(EncodedClass.Substring(PotassiumIndex, CropTypeIndex - 2 - PotassiumIndex), out int Potassium);
+            Int32.TryParse(EncodedClass.Substring(PotassiumIndex, CropTypeIndex - 3 - PotassiumIndex), out int Potassium);
             Int32.TryParse(EncodedClass.Substring(CropTypeIndex, AfterGrowthIndex - 3 - CropTypeIndex), out int CropType);
             string Val = EncodedClass.Substring(AfterGrowthIndex);
             bool afterGrowth = false;
