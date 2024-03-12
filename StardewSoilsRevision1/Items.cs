@@ -107,9 +107,9 @@ namespace StardewSoils
                     break;
             }
 
-            if (TileList.AllRegisteredTiles.ContainsKey(new TilePosAndLoc(Tile, who.currentLocation.ToString())))
+            if (TileList.AllRegisteredTiles.ContainsKey(new TilePosAndLocation(Tile, who.currentLocation.ToString())))
             {
-                TileList.AllRegisteredTiles[new TilePosAndLoc(Tile, who.currentLocation.ToString())].Nitrogen += 2;
+                TileList.AllRegisteredTiles[new TilePosAndLocation(Tile, who.currentLocation.ToString())].Nitrogen += 2;
                 who.removeItemFromInventory(this);
             }
             else
@@ -189,9 +189,9 @@ namespace StardewSoils
                     break;
             }
 
-            if (TileList.AllRegisteredTiles.ContainsKey(new TilePosAndLoc(Tile, who.currentLocation.ToString())))
+            if (TileList.AllRegisteredTiles.ContainsKey(new TilePosAndLocation(Tile, who.currentLocation.ToString())))
             {
-                TileList.AllRegisteredTiles[new TilePosAndLoc(Tile, who.currentLocation.ToString())].Phosphorus += 2;
+                TileList.AllRegisteredTiles[new TilePosAndLocation(Tile, who.currentLocation.ToString())].Phosphorus += 2;
                 who.removeItemFromInventory(this);
             }
             else
@@ -276,9 +276,9 @@ namespace StardewSoils
                     break;
             }
 
-            if (TileList.AllRegisteredTiles.ContainsKey(new TilePosAndLoc(Tile, who.currentLocation.ToString())))
+            if (TileList.AllRegisteredTiles.ContainsKey(new TilePosAndLocation(Tile, who.currentLocation.ToString())))
             {
-                TileList.AllRegisteredTiles[new TilePosAndLoc(Tile, who.currentLocation.ToString())].Potassium += 2;
+                TileList.AllRegisteredTiles[new TilePosAndLocation(Tile, who.currentLocation.ToString())].Potassium += 2;
                 who.removeItemFromInventory(this);
             }
             else

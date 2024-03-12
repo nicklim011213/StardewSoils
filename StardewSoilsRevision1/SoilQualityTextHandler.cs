@@ -63,7 +63,7 @@ namespace StardewSoils
 
         public static string ArrowChoice(float Req)
         {
-            string Arrow = " ";
+            string Arrow;
             if (Req > 0)
                 Arrow = "+";
             else if (Req < 0)
