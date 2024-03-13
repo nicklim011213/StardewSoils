@@ -18,12 +18,13 @@ namespace StardewSoils
             {
                 foreach (var Tile in TileList.AllRegisteredTiles)
                 {
-                    string TileData = TileSoilBuilder.ClassToSoilData(Tile.Value);
-                    string TileKey = TileSoilBuilder.PositionToKeyData(Tile.Key.pos);
-                    // May not send game location
-                    helper.Multiplayer.SendMessage(TileData, "TileDataSync", modIDs: new[] { ID });
-                    helper.Multiplayer.SendMessage(TileKey, "TileKeySync", modIDs: new[] { ID });
-                    helper.Multiplayer.SendMessage(Tile.Value.Location.ToString(), "TileKeyLocationSync", modIDs: new[] { ID });
+                    FullTileData TileStruct = new FullTileData
+                    {
+                        Data = TileSoilBuilder.ClassToSoilData(Tile.Value),
+                        KeyPosition = Tile.Key.pos,
+                        KeyLocation = Tile.Key.location,
+                    };
+                    helper.Multiplayer.SendMessage(TileStruct, "TileDataSync", modIDs: new[] { ID });
                 }
             }
         }
@@ -34,14 +35,17 @@ namespace StardewSoils
             if (e.FromModID == ID)
             {
                 // Build out Data and Key Handler (also work out Gamelocation)
-                var Tile = e.ReadAs<TileSoil>();
-                TileList.AllRegisteredTiles.Add(new TilePosAndLocation(Tile.TilePos, Tile.Location.ToString()), Tile);
+                var Tile = e.ReadAs<FullTileData>();
+
+                var TileInstance = TileSoilBuilder.DataToClass(Tile.Data, Tile.KeyPosition.ToString(), Game1.getLocationFromName(Tile.KeyLocation));
+                TileList.AllRegisteredTiles.Add(new TilePosAndLocation(TileInstance.TilePos, TileInstance.Location.ToString()), TileInstance);
+
                 // Only the host needs to save the data
                 if (Game1.IsMasterGame)
                 {
-                    var Location = Tile.Location;
-                    var Key = TileSoilBuilder.PositionToKeyData(Tile.TilePos);
-                    Location.modData[Key] = TileSoilBuilder.ClassToSoilData(Tile);
+                    var Location = Game1.getLocationFromName(Tile.KeyLocation);
+                    var Key = TileSoilBuilder.PositionToKeyData(Tile.KeyPosition);
+                    Location.modData[Key] = TileSoilBuilder.ClassToSoilData(TileInstance);
                 }
             }
         }
@@ -78,10 +82,16 @@ namespace StardewSoils
                     string TileData = TileSoilBuilder.GenerateSoilData();
                     string TileKey = TileSoilBuilder.PositionToKeyData(TileTilled.Key);
                     Game1.player.currentLocation.modData[TileKey] = TileData;
-                    var Newtile = TileSoilBuilder.DataToClass(TileData, TileKey, TileLocation);
-                    helper.Multiplayer.SendMessage(TileData, "TileDataSync", modIDs: new[] { ID });
-                    helper.Multiplayer.SendMessage(TileKey, "TileKeySync", modIDs: new[] { ID });
-                    helper.Multiplayer.SendMessage(TileLocation.ToString(), "TileKeyLocationSync", modIDs: new[] { ID });
+                    var Tile = TileSoilBuilder.DataToClass(TileData, TileKey, TileLocation);
+                    TileList.AllRegisteredTiles.TryAdd(new TilePosAndLocation(TileTilled.Key, TileLocation.Name), Tile);
+
+                    var TileStruct = new FullTileData
+                    {
+                        Data = TileData,
+                        KeyPosition = TileTilled.Key,
+                        KeyLocation = TileLocation.Name,
+                    };
+                    helper.Multiplayer.SendMessage(TileStruct, "TileDataSync", modIDs: new[] { ID });
                 }
             }
         }

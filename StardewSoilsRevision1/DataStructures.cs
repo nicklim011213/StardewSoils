@@ -183,7 +183,7 @@ namespace StardewSoils
             Vector2 Pos = new Vector2(KeyX, KeyY);
 
 
-            return new TileSoil(Nitrogen, Phosphorus, Potassium, CropType, afterGrowth, Pos, location, EncodedKey);
+            return new TileSoil(Nitrogen, Phosphorus, Potassium, CropType, afterGrowth, Pos, location);
         }
 
         // Takes a position and creates a SoilData Key
@@ -203,7 +203,7 @@ namespace StardewSoils
         public bool aftergrowth = false;
         public GameLocation Location = null;
 
-        public TileSoil(int N, int P, int K, int C, bool A, Vector2 pos, GameLocation loc, string Key)
+        public TileSoil(int N, int P, int K, int C, bool A, Vector2 pos, GameLocation loc)
         {
             Nitrogen = N;
             Phosphorus = P;
@@ -213,7 +213,7 @@ namespace StardewSoils
             this.TilePos = pos;
             Location = loc;
             GetCropOnTile(this.TilePos, loc);
-            TileList.AllRegisteredTiles[new TilePosAndLocation(this.TilePos, this.Location.ToString())] = this;
+            TileList.AllRegisteredTiles[new TilePosAndLocation(this.TilePos, this.Location.Name)] = this;
         }
 
         public void GrowthCheck()
@@ -336,5 +336,12 @@ namespace StardewSoils
             this.location = location;
         }
 
+    }
+
+    public struct FullTileData
+    {
+        public string Data;
+        public Vector2 KeyPosition;
+        public string KeyLocation;
     }
 }
